@@ -1,0 +1,611 @@
+{% with messages = get_flashed_messages(with_categories=true) %} {% if messages
+%} {% for category, message in messages %}
+<div class="alert alert-{{ category }}">{{ message }}</div>
+{% endfor %} {% endif %} {% endwith %}
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Publisher Dashboard - AbilityHire</title>
+    <style>
+            :root {
+              --light-bg: #f4f4f4;
+              --dark-bg: #1c1c1c;
+              --light-text: #111;
+              --dark-text: #f0f0f0;
+              --highlight: #005a9c;
+              --lang-selected: #004080;
+              --primary: #005a9c;
+              --primary-dark: #004080;
+              --border: #e2e8f0;
+              --global-font-size: {{ global_font_size }};
+            }
+
+            * {
+              margin: 0;
+              padding: 0;
+              box-sizing: border-box;
+            }
+
+            body {
+              font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+              font-size: var(--global-font-size);
+              background-color: var(--light-bg);
+              color: var(--light-text);
+              transition: background-color 0.3s, color 0.3s;
+              min-height: 100vh;
+              display: flex;
+              flex-direction: column;
+            }
+
+            header {
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              padding: 1.5em 2em;
+              background-color: var(--highlight);
+              color: white;
+              font-size: 1.1em;
+            }
+
+            .logo {
+              display: flex;
+              align-items: center;
+              font-size: 1.5em;
+              font-weight: bold;
+            }
+
+            .logo img {
+              height: 40px;
+              margin-right: 10px;
+            }
+
+            .nav-buttons button,
+            .lang-toggle button {
+              background: none;
+              border: none;
+              color: white;
+              font-size: 1em;
+              margin-left: 1em;
+              cursor: pointer;
+              padding: 0.3em 0.6em;
+              border-radius: 5px;
+            }
+
+            .lang-toggle button.selected {
+              background-color: var(--lang-selected);
+            }
+
+            .emoji-toggle {
+              background: none;
+              border: none;
+              font-size: 1.5em;
+              cursor: pointer;
+              margin-left: 1em;
+            }
+
+            .main-container {
+              display: flex;
+              padding: 2em;
+              flex: 1;
+            }
+
+            .sidebar {
+              width: 250px;
+              background-color: white;
+              padding: 1.5em;
+              border-radius: 10px;
+              box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+              margin-right: 2em;
+            }
+
+            .profile-preview {
+              text-align: center;
+              margin-bottom: 1.5em;
+            }
+
+            .profile-preview img {
+              width: 100px;
+              height: 100px;
+              border-radius: 50%;
+              object-fit: cover;
+              margin-bottom: 0.5em;
+            }
+
+            .profile-info h2 {
+              font-size: 1.2em;
+              color: var(--highlight);
+              margin-bottom: 0.3em;
+            }
+
+            .profile-info p {
+              color: #666;
+              font-size: 0.9em;
+            }
+
+            .nav-links {
+              margin-top: 1.5em;
+            }
+
+            .nav-links a {
+              display: flex;
+              align-items: center;
+              padding: 0.8em 1em;
+              margin-bottom: 0.5em;
+              text-decoration: none;
+              color: var(--light-text);
+              border-radius: 5px;
+              transition: background-color 0.3s;
+            }
+
+            .nav-links a:hover {
+              background-color: rgba(0, 90, 156, 0.1);
+            }
+
+            .nav-links a.active {
+              background-color: var(--highlight);
+              color: white;
+            }
+
+            .nav-links a i {
+              margin-right: 0.5em;
+              font-size: 1.2em;
+            }
+
+            .content-area {
+              flex: 1;
+            }
+
+            .welcome-section {
+              background-color: white;
+              padding: 1.5em;
+              border-radius: 10px;
+              box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+              margin-bottom: 2em;
+            }
+
+            .welcome-section h1 {
+              color: var(--highlight);
+              margin-bottom: 0.5em;
+            }
+
+            .stats-cards {
+              display: grid;
+              grid-template-columns: repeat(3, 1fr);
+              gap: 1.5em;
+              margin-bottom: 2em;
+            }
+
+            .stat-card {
+              background-color: white;
+              padding: 1.5em;
+              border-radius: 10px;
+              box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+              text-align: center;
+            }
+
+            .stat-card h3 {
+              color: var(--highlight);
+              margin-bottom: 0.5em;
+            }
+
+            .stat-card p {
+              font-size: 2em;
+              font-weight: bold;
+              color: var(--highlight);
+            }
+
+            .recent-activity {
+              background-color: white;
+              padding: 1.5em;
+              border-radius: 10px;
+              box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            }
+
+            .recent-activity h2 {
+              color: var(--highlight);
+              margin-bottom: 1em;
+            }
+
+            .activity-item {
+              display: flex;
+              align-items: center;
+              padding: 0.8em 0;
+              border-bottom: 1px solid #eee;
+            }
+
+            .activity-item:last-child {
+              border-bottom: none;
+            }
+
+            .activity-item i {
+              margin-right: 1em;
+              color: var(--highlight);
+              font-size: 1.2em;
+            }
+
+            .scrolling-text {
+              position: fixed;
+              bottom: 0;
+              width: 100%;
+              white-space: nowrap;
+              overflow: hidden;
+              background-color: var(--highlight);
+              color: white;
+              font-size: 1.2em;
+              padding: 0.5em;
+            }
+
+            .scrolling-text span {
+              display: inline-block;
+              padding-left: 100%;
+              animation: scroll-left 20s linear infinite;
+            }
+
+            @keyframes scroll-left {
+              0% { transform: translateX(0%); opacity: 1; }
+              100% { transform: translateX(-100%); opacity: 0.3; }
+            }
+
+            .dark-mode {
+              background-color: var(--dark-bg);
+              color: var(--dark-text);
+            }
+
+            .dark-mode header {
+              background-color: #2d2d2d;
+            }
+
+            .dark-mode .sidebar,
+            .dark-mode .welcome-section,
+            .dark-mode .stat-card,
+            .dark-mode .recent-activity {
+              background-color: #2e2e2e;
+              color: var(--dark-text);
+            }
+
+            .dark-mode .nav-links a {
+              color: var(--dark-text);
+            }
+
+            .dark-mode .nav-links a:hover {
+              background-color: #3e3e3e;
+            }
+
+            .dark-mode .activity-item {
+              border-bottom-color: #444;
+            }
+
+            .dark-mode .scrolling-text {
+              background-color: #444;
+            }
+            .recent-applicants {
+          background-color: white;
+          padding: 1.5em;
+          border-radius: 10px;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+          margin-top: 2em;
+      }
+
+      .applicant-item {
+          display: flex;
+          align-items: center;
+          padding: 0.8em 0;
+          border-bottom: 1px solid #eee;
+      }
+
+      .applicant-item:last-child {
+          border-bottom: none;
+      }
+
+      .applicant-item i {
+          margin-right: 1em;
+          font-size: 1.2em;
+      }
+
+      .dark-mode .recent-applicants {
+          background-color: #2e2e2e;
+      }
+
+      .dark-mode .applicant-item {
+          border-bottom-color: #444;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="logo">
+        <a href="{{ url_for('views.home') }}">
+          <img src="{{ url_for('static', filename='images/abilityhire_logo.png') }}" alt="AbilityHire Logo" />
+        </a>
+        <span>AbilityHire</span>
+      </div>
+      <div class="nav-buttons">
+        <button onclick="history.back();" id="aboutBtn">About?</button>
+        <span class="lang-toggle">
+          <button class="lang-btn" data-lang="en" onclick="setLanguage('en')">
+            English
+          </button>
+          <button class="lang-btn" data-lang="ar" onclick="setLanguage('ar')">
+            عربي
+          </button>
+        </span>
+        <button class="emoji-toggle" onclick="toggleMode()">🌓</button>
+      </div>
+    </header>
+
+    <div class="main-container">
+      <div class="sidebar">
+        <div class="profile-preview">
+          <div class="profile-info">
+            <p id="profileTitle">{{ publisher.fname }}</p>
+          </div>
+        </div>
+        <div class="nav-links">
+          <a href="{{ url_for('views.publisher_dashboard') }}" class="active"
+            ><i>📊</i> <span id="dashboardLink">Dashboard</span></a
+          >
+          <a href="{{ url_for('views.postjobs') }}"
+            ><i>📝</i> <span id="postJobsLink">Post Jobs</span></a
+          >
+                    <a href="{{ url_for('views.publisher_profile') }}"
+            ><i>👤</i> <span id="profileLink">Profile</span></a
+          >
+          <a href="{{ url_for('views.favorites') }}"
+            ><i>❤️</i> <span id="favoritesLink">Favorites</span></a
+          >
+          <a href="{{ url_for('views.setting') }}"
+            ><i>⚙️</i> <span id="settingsLink">Settings</span></a
+          >
+          <a href="{{ url_for('auth.logout') }}"
+            ><i>🚪</i> <span id="logoutLink">Logout</span></a
+          >
+        </div>
+      </div>
+
+      <div class="content-area">
+        <div class="welcome-section">
+          <h1 id="WelcomeTitle">
+            Welcome, <span id="userFirstName">{{ publisher.fname }}</span>
+          </h1>
+          <p id="welcomeMessage">
+            Here's what's happening with your job posts today.
+          </p>
+        </div>
+
+        <div class="stats-cards">
+          <div class="stat-card">
+            <h3 id="totalJobsTitle">Total Jobs Posted</h3>
+            <button id="btnTotalJobs" style="font-size: 2em; font-weight: bold; color: var(--highlight); background: none; border: none; cursor: pointer;">
+              {{ publisher.job_count }}
+            </button>
+          </div>
+          <div class="stat-card">
+            <h3 id="openJobsTitle">Open Positions</h3>
+            <button id="btnOpenPositions" style="font-size: 2em; font-weight: bold; color: var(--highlight); background: none; border: none; cursor: pointer;">
+              {{ publisher.open_jobs_count }}
+            </button>
+          </div>
+          <div class="stat-card">
+            <h3 id="applicationsTitle">Applications Received</h3>
+            <button id="btnApplications" style="font-size: 2em; font-weight: bold; color: var(--highlight); background: none; border: none; cursor: pointer;">
+              {{ publisher.application_count }}
+            </button>
+          </div>
+        </div>
+
+        <!-- Detailed info sections, initially hidden -->
+        <div id="totalJobsDetails" style="display:none; margin-top: 20px;">
+          <h2>Total Jobs Posted</h2>
+          <table border="1" width="100%" style="border-collapse: collapse;">
+            <thead>
+              <tr>
+                <th>Job Title</th>
+                <th>City</th>
+                <th>Salary</th>
+                <th>Status</th>
+                <th>Disability Type</th>
+                <th>Posting Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for job in publisher.jobs_posted %}
+              <tr>
+                <td>{{ job.jobtitle }}</td>
+                <td>{{ job.city }}</td>
+                <td>{{ job.salary }}</td>
+                <td>{{ job.status }}</td>
+                <td>{{ job.disability_type }}</td>
+                <td>{{ job.postingdate.strftime('%b %d, %Y') if job.postingdate else '' }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <div id="openJobsDetails" style="display:none; margin-top: 20px;">
+          <h2>Open Positions</h2>
+          <ul>
+            {% for job in publisher.open_jobs %}
+              <li>{{ job.jobtitle }} ({{ job.city }})</li>
+            {% endfor %}
+          </ul>
+        </div>
+
+        <div id="applicationsDetails" style="display:none; margin-top: 20px;">
+          <h2>Applications</h2>
+          <table border="1" width="100%" style="border-collapse: collapse;">
+            <thead>
+              <tr>
+                <th>Applicant</th>
+                <th>Job Title</th>
+                <th>Application Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for app in publisher.applications %}
+              <tr>
+                <td>{{ app.fname }} {{ app.lname }}</td>
+                <td>{{ app.jobtitle }}</td>
+                <td>{{ app.applytodate.strftime('%b %d, %Y') if app.applytodate else '' }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <script>
+          document.getElementById('btnTotalJobs').addEventListener('click', function() {
+            toggleSection('totalJobsDetails');
+          });
+          document.getElementById('btnOpenPositions').addEventListener('click', function() {
+            toggleSection('openJobsDetails');
+          });
+          document.getElementById('btnApplications').addEventListener('click', function() {
+            toggleSection('applicationsDetails');
+          });
+
+          function toggleSection(sectionId) {
+            const sections = ['totalJobsDetails', 'openJobsDetails', 'applicationsDetails'];
+            sections.forEach(id => {
+              const el = document.getElementById(id);
+              if (id === sectionId) {
+                el.style.display = (el.style.display === 'none' || el.style.display === '') ? 'block' : 'none';
+              } else {
+                el.style.display = 'none';
+              }
+            });
+          }
+        </script>
+
+        <div class="recent-applicants">
+          <h2 id="recentApplicantsTitle">Recent Applications</h2>
+          {% if publisher.recent_applicants %} {% for applicant in
+          publisher.recent_applicants %}
+          <div class="applicant-item">
+            <i>👤</i>
+            <span
+              >{{ applicant.fname }} {{ applicant.lname }} applied for {{ applicant.jobtitle
+              }} on {{ applicant.applytodate.strftime('%b %d, %Y') }}</span
+            >
+            <form method="POST" action="{{ url_for('views.add_favorite') }}" style="display: inline; margin-left: 10px;">
+              <input type="hidden" name="job_id" value="{{ applicant.jobID }}" />
+              <button type="submit" class="favorite-btn" title="Add to favorites" style="background-color: #0a66c2; color: white; border: none; padding: 0.3em 0.6em; border-radius: 4px; cursor: pointer; font-size: 0.9em;">
+                ❤️
+              </button>
+            </form>
+          </div>
+          {% endfor %} {% else %}
+          <p>No recent applicants found</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="scrolling-text">
+      <span id="scrollQuotes">
+        Diversity drives innovation. — Inclusive workplaces thrive. — Talent
+        comes in many forms. — Build a better workforce.
+      </span>
+    </div>
+
+    <script>
+      let currentLang = localStorage.getItem("abilityHireLang") || "en";
+      let currentMode = localStorage.getItem("abilityHireMode") || "light";
+
+      function setLanguage(lang) {
+        currentLang = lang;
+        localStorage.setItem("abilityHireLang", lang);
+        applyLanguage();
+      }
+
+      function toggleMode() {
+        document.body.classList.toggle("dark-mode");
+        currentMode = document.body.classList.contains("dark-mode")
+          ? "dark"
+          : "light";
+        localStorage.setItem("abilityHireMode", currentMode);
+      }
+
+      function navigateTo(page) {
+        window.location.href = `${page}?lang=${currentLang}&mode=${currentMode}`;
+      }
+
+      function applyLanguage() {
+        document.body.dir = currentLang === "ar" ? "rtl" : "ltr";
+        document.querySelectorAll(".lang-btn").forEach((btn) => {
+          btn.classList.toggle("selected", btn.dataset.lang === currentLang);
+        });
+
+        const translations = {
+          en: {
+            welcomeTitle: "Welcome ,",
+            welcomeMessage:
+              "Here's what's happening with your job posts today.",
+            dashboardLink: "Dashboard",
+            postJobsLink: "Post Jobs",
+            candidatesLink: "Candidates",
+            settingsLink: "Settings",
+            logoutLink: "Logout",
+            activeJobsTitle: "Active Jobs",
+            applicationsTitle: "Applications",
+            interviewsTitle: "Interviews",
+            recentActivityTitle: "Recent Activity",
+            activity1: "Jane Smith applied for Frontend Developer position",
+            activity2: "Michael Johnson scheduled an interview for tomorrow",
+            activity3: "You posted a new job for UX Designer",
+            aboutBtn: "About",
+            scrollQuotes:
+              "Diversity drives innovation. — Inclusive workplaces thrive. — Talent comes in many forms. — Build a better workforce.",
+          },
+          ar: {
+            welcomeTitle: "مرحبًا بعودتك،",
+            welcomeMessage: "إليك ما يحدث مع وظائفك المنشورة اليوم.",
+            dashboardLink: "لوحة التحكم",
+            postJobsLink: "نشر الوظائف",
+            candidatesLink: "المتقدمين",
+            settingsLink: "الإعدادات",
+            logoutLink: "تسجيل الخروج",
+            activeJobsTitle: "الوظائف النشطة",
+            applicationsTitle: "الطلبات",
+            interviewsTitle: "المقابلات",
+            recentActivityTitle: "النشاط الأخير",
+            activity1: "تقدمت جين سميث لوظيفة مطور واجهة أمامية",
+            activity2: "قام مايكل جونسون بجدولة مقابلة ليوم غد",
+            activity3: "لقد نشرت وظيفة جديدة لمصمم واجهة مستخدم",
+            aboutBtn: "حول",
+            homeBtn: "الرئيسية",
+            scrollQuotes:
+              "التنوع يقود الابتكار. — بيئات العمل الشاملة تزدهر. — الموهبة تأتي بأشكال عديدة. — بناء قوة عاملة أفضل.",
+          },
+        };
+
+        const t = translations[currentLang];
+        Object.keys(t).forEach((key) => {
+          const element = document.getElementById(key);
+          if (element) element.textContent = t[key];
+        });
+      }
+
+      window.addEventListener("DOMContentLoaded", function () {
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlLang = urlParams.get("lang");
+        const urlMode = urlParams.get("mode");
+
+        if (urlLang) {
+          currentLang = urlLang;
+          localStorage.setItem("abilityHireLang", currentLang);
+        }
+        if (urlMode) {
+          currentMode = urlMode;
+          localStorage.setItem("abilityHireMode", currentMode);
+          if (currentMode === "dark") document.body.classList.add("dark-mode");
+        }
+
+        applyLanguage();
+      });
+    </script>
+  </body>
+</html>

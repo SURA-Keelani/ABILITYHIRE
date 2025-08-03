@@ -1,1 +1,0 @@
-I will use this file to prepare the search/replace blocks for the base.html edits to add RTL support incrementally.
